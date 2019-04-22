@@ -124,19 +124,19 @@ parts:
     prime:
     - -*
 
-  vulkan-sdk:
-    plugin: nil
-    override-stage: |
-      wget -qO - http://packages.lunarg.com/lunarg-signing-key-pub.asc | sudo apt-key add -
-      sudo wget -qO /etc/apt/sources.list.d/lunarg-vulkan-1.1.106-bionic.list http://packages.lunarg.com/vulkan/1.1.106/lunarg-vulkan-1.1.106-bionic.list
-      sudo apt update
-      sudo apt install --yes libvulkan-dev
+  #vulkan-sdk:
+    #plugin: nil
+    #override-stage: |
+      #wget -qO - http://packages.lunarg.com/lunarg-signing-key-pub.asc | sudo apt-key add -
+      #sudo wget -qO /etc/apt/sources.list.d/lunarg-vulkan-1.1.106-bionic.list http://packages.lunarg.com/vulkan/1.1.106/lunarg-vulkan-1.1.106-bionic.list
+      #sudo apt update
+      #sudo apt install --yes libvulkan-dev
 
   # https://github.com/Tencent/ncnn/wiki/how-to-build#build-for-linux-x86
   ncnn:
     after:
     - glslang-tools
-    - vulkan-sdk
+    #- vulkan-sdk
 
     source: https://github.com/Tencent/ncnn.git
     source-commit: c180e875026b6f6ffa0f6e3e489a5c1487439b7f
@@ -145,8 +145,8 @@ parts:
     - g++
     - libprotobuf-dev
 
-    # Provided by vulkan-sdk part
-    #- libvulkan-dev
+    # Also provided by vulkan-sdk part
+    - libvulkan-dev
 
     - protobuf-compiler
     stage-packages:
@@ -181,7 +181,7 @@ parts:
     - ncnn
     - patching
     - selective-checkout
-    - vulkan-sdk
+    #- vulkan-sdk
 
     source: https://github.com/nihui/waifu2x-ncnn-vulkan.git
     source-depth: 30
@@ -198,8 +198,8 @@ parts:
     build-packages:
     - libopenmpi-dev
 
-    # Provided by vulkan-sdk part
-    #- libvulkan-dev
+    # Also provided by vulkan-sdk part
+    - libvulkan-dev
 
     stage-packages:
     - libgomp1
