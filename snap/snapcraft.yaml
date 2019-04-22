@@ -1,6 +1,6 @@
 %YAML 1.1
 ---
-# Snapcraft Recipe for waifu2x
+# Snapcraft Recipe for waifu2x-ncnn-vulkan
 # ------------------------------
 # This file is in the YAML data serialization format:
 # http://yaml.org
@@ -13,17 +13,23 @@
 #   https://forum.snapcraft.io/c/doc
 # For support refer to the snapcraft section in the Snapcraft Forum:
 # https://forum.snapcraft.io/c/snapcraft
-name: waifu2x
-title: waifu2x (UNOFFICIAL)
+name: waifu2x-ncnn-vulkan
+title: waifu2x-ncnn-vulkan (UNOFFICIAL)
 summary: Image Super-Resolution for Anime-style art
 description: |
-  Image Super-Resolution for Anime-style art using Deep Convolutional Neural Networks. And it supports photo.
+  waifu2x converter ncnn version, runs fast on intel / amd / nvidia with vulkan
+
+  waifu2x-ncnn-vulkan use [ncnn project][1] as the universal nerual network inference framework
+
+  [1]: https://github.com/Tencent/ncnn
 
   **Snap specific information**
 
-  This is not an official distribution of waifu2x, for any problems regarding the use of this snap please refer to the snap issue tracker:
+  This is not an official distribution of waifu2x-ncnn-vulkan, for any problems regarding the use of this snap please refer to the snap issue tracker:
 
   https://github.com/Lin-Buo-Ren/waifu2x-snap/issues
+
+  This snap currently only ships intel / amd vulkan drivers
 
 # The path of icon to represent the snap, relative to the source tree directory
 # Only PNG or SVG image is supported, dimension must be greater than 256x256px
@@ -107,57 +113,136 @@ parts:
     - libc-bin
     - locales
 
+  # Check out the tagged release revision if it isn't promoted to the stable channel
+  # https://forum.snapcraft.io/t/selective-checkout-check-out-the-tagged-release-revision-if-it-isnt-promoted-to-the-stable-channel/10617
+  selective-checkout:
+    plugin: nil
+    build-packages:
+    - git
+    stage-snaps:
+    - selective-checkout/latest/edge
+    prime:
+    - -*
+
+  vulkan-sdk:
+    plugin: nil
+    override-stage: |
+      wget -qO - http://packages.lunarg.com/lunarg-signing-key-pub.asc | sudo apt-key add -
+      sudo wget -qO /etc/apt/sources.list.d/lunarg-vulkan-1.1.106-bionic.list http://packages.lunarg.com/vulkan/1.1.106/lunarg-vulkan-1.1.106-bionic.list
+      sudo apt update
+      sudo apt install --yes libvulkan-dev
+
+  # https://github.com/Tencent/ncnn/wiki/how-to-build#build-for-linux-x86
+  ncnn:
+    after:
+    - glslang-tools
+    - vulkan-sdk
+
+    source: https://github.com/Tencent/ncnn.git
+    source-commit: c180e875026b6f6ffa0f6e3e489a5c1487439b7f
+    #source-depth: 1
+    build-packages:
+    - g++
+    - libprotobuf-dev
+
+    # Provided by vulkan-sdk part
+    #- libvulkan-dev
+
+    - protobuf-compiler
+    stage-packages:
+    - libprotobuf10
+    plugin: cmake
+    configflags:
+    - -DNCNN_VULKAN=ON
+    filesets:
+      library-include:
+      - include/*
+      library-static:
+      - lib/*.a
+    prime:
+    - -*
+
+  glslang-tools:
+    source: https://github.com/KhronosGroup/glslang.git
+    source-depth: 1
+    source-tag: 7.11.3188
+    plugin: cmake
+    build-packages:
+    - g++
+    configflags:
+    - -DCMAKE_BUILD_TYPE=Release
+    stage:
+    - bin/glslangValidator
+    prime:
+    - -*
+
   main:
     after:
-    # for patch-desktop-entries.*
+    - ncnn
     - patching
+    - selective-checkout
+    - vulkan-sdk
 
-    # for override-pull script
-    - scriptlets
-
-    source: .
-    #source-type:
-    #source-tag:
-    #source-depth:
+    source: https://github.com/nihui/waifu2x-ncnn-vulkan.git
+    source-depth: 30
     override-pull: |
       set -o nounset
 
       snapcraftctl pull
 
-      "${SNAPCRAFT_STAGE}"/scriptlets/main-adopt-info
+      "$SNAPCRAFT_STAGE"/scriptlets/selective-checkout \
+        --append-packaging-revision \
+        --release-tag-pattern='^[[:digit:]]+$'
 
-    plugin: dump
-    organize:
-      waifu2x: bin/
-    stage:
-    - bin/*
+    plugin: cmake
+    build-packages:
+    - libopenmpi-dev
 
-    override-prime: |
-      set \
-        -o nounset
+    # Provided by vulkan-sdk part
+    #- libvulkan-dev
 
-      snapcraftctl prime
+    stage-packages:
+    - libgomp1
+    - libopenmpi2
+    - libvulkan1
+    - mesa-vulkan-drivers
 
-      "${SNAPCRAFT_STAGE}"/patching/patch-desktop-entries.bash
+    override-build: |
+      patch \
+        --strip=1 \
+        "${SNAPCRAFT_PART_SRC}"/CMakeLists.txt \
+        < "${SNAPCRAFT_STAGE}"/patching/waifu2x-ncnn-vulkan-add-missing-install-target.patch
+
+      sed \
+        --in-place \
+        "s#/home/nihui/osd/ncnn/build/install#${SNAPCRAFT_STAGE}#" \
+        "${SNAPCRAFT_PART_SRC}"/CMakeLists.txt
+
+      snapcraftctl build
+
+      cp \
+        --recursive \
+        --verbose \
+        "${SNAPCRAFT_PART_SRC}"/models-cunet \
+        "${SNAPCRAFT_PART_INSTALL}"/bin
 
 # Apps that are exposed by the snap package
 # If the _app_name_ is identical with the _snap_name_ it can be directly run
 # with `_snap_name_` or `snap run _snap_name_` commands, otherwise it can only be run
 # via `_snap_name_._app_name_` or `snap run _snap_name_._app_name_`
 apps:
-  waifu2x:
+  waifu2x-ncnn-vulkan:
     # The adapter to set up runtime environment at the launch of the snap
     # NOTE: The `command-chain` property is only supported by the `full` adapter
     adapter: full
 
     # An *relative path* to an executable file root from the `prime` directory to be executed, and its command-line arguments
     # NOTE: The right angle bracket at the beginning of the value of the `command` keyword starts a YAML folded style block scalar, refer the following spec document for more info: http://yaml.org/spec/1.2/spec.html#id2796251
-    command: bin/waifu2x
+    command: bin/waifu2x-launch
 
     # The commands that are run, in order, before running the one specified by the `command` key
     command-chain:
-    - bin/desktop-launch
-    - bin/waifu2x-launch
+    - bin/locales-launch
 
 # Refer the following documentation for asserting interface plugs and slots in a security confined snap:
 # Interface management - doc - snapcraft.io
@@ -170,7 +255,20 @@ plugs:
   home:
   removable-media: # Non-A/C
 
+  # Graphics hardware access
+  opengl:
+
   # Network access
   #network:
 
 #slots:
+
+layout:
+  /usr/share/vulkan:
+    symlink: $SNAP/usr/share/vulkan
+
+  /usr/lib/$SNAPCRAFT_ARCH_TRIPLET/libvulkan_intel.so:
+    symlink: $SNAP/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/libvulkan_intel.so
+
+  /usr/lib/$SNAPCRAFT_ARCH_TRIPLET/libvulkan_radeon.so:
+    symlink: $SNAP/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/libvulkan_radeon.so

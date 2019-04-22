@@ -9,7 +9,23 @@ set \
     -o nounset \
     -o pipefail
 
-#export IMPORTANT_ENVIRONMENT_VARIABLE=value
+# HACK: Program assumes model files under PWD...
+if test $# -lt 2; then
+    waifu2x
+else
+    declare input_file="${1}"; shift
+    declare output_file="${1}"; shift
 
-# Finally run the next part of the command chain
-exec "${@}"
+    declare \
+        input_file_absolute_path \
+        output_file_absolute_path
+
+    input_file_absolute_path="$(realpath "${input_file}")"
+    output_file_absolute_path="$(realpath "${output_file}")"
+    unset \
+        input_file \
+        output_file
+
+    cd "${SNAP}"/bin
+    ./waifu2x "${input_file_absolute_path}" "${output_file_absolute_path}" "${@}"
+fi

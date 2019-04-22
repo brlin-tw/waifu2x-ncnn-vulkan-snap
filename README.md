@@ -1,5 +1,5 @@
-# Unofficial Snap Packaging for waifu2x
-This is the unofficial snap packaging for waifu2x, [Snaps are universal Linux packages](https://snapcraft.io).
+# Unofficial Snap Packaging for waifu2x-ncnn-vulkan
+This is the unofficial snap packaging for waifu2x-ncnn-vulkan, [Snaps are universal Linux packages](https://snapcraft.io).
 
 Refer [snap/README.md](snap/README.md) for user-oriented information.
 

@@ -1,0 +1,12 @@
+Add the missing install target to CMakeLists
+
+Signed-off-by: 林博仁(Buo-ren, Lin) <Buo.Ren.Lin@gmail.com>
+
+--- a/CMakeLists.txt	2019-04-22 15:44:22.557414263 +0800
++++ b/CMakeLists.txt	2019-04-22 15:45:01.453007019 +0800
+@@ -76,3 +76,5 @@
+ add_dependencies(waifu2x generate-spirv)
+ 
+ target_link_libraries(waifu2x ncnn ${Vulkan_LIBRARY} ${OpenMP_CXX_LIBRARIES})
++
++install(TARGETS waifu2x DESTINATION bin)
