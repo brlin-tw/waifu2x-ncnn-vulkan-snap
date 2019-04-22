@@ -1,6 +1,6 @@
 %YAML 1.1
 ---
-# Snapcraft Recipe for [Project]
+# Snapcraft Recipe for waifu2x
 # ------------------------------
 # This file is in the YAML data serialization format:
 # http://yaml.org
@@ -13,34 +13,28 @@
 #   https://forum.snapcraft.io/c/doc
 # For support refer to the snapcraft section in the Snapcraft Forum:
 # https://forum.snapcraft.io/c/snapcraft
-
-# All following comments, including this one, are designed to be stripped
-# before contributing the recipe to the upstream
-
-# [Project], my-awesome-app, my-awesome-app-launch
-# are placeholders text meant to be replaced by appropriate content
-name: my-awesome-app
-title: My Awesome App.
-summary: Single-line elevator pitch for your amazing snap under 79 chars.
+name: waifu2x
+title: waifu2x (UNOFFICIAL)
+summary: Image Super-Resolution for Anime-style art
 description: |
-  This is my-awesome-app's description. You have a paragraph or two to tell
-  the most important story about your snap. Keep it under 100 words though,
-  we live in tweetspace and your description wants to look good in the snap
-  store.
+  Image Super-Resolution for Anime-style art using Deep Convolutional Neural Networks. And it supports photo.
 
-  This is the demonstration app of the Snapcrafters Template Plus:
-  https://github.com/Lin-Buo-Ren/snapcrafters-template-plus
+  **Snap specific information**
+
+  This is not an official distribution of waifu2x, for any problems regarding the use of this snap please refer to the snap issue tracker:
+
+  https://github.com/Lin-Buo-Ren/waifu2x-snap/issues
 
 # The path of icon to represent the snap, relative to the source tree directory
 # Only PNG or SVG image is supported, dimension must be greater than 256x256px
-icon: snap/gui/my-awesome-app.png
+#icon: snap/gui/waifu2x.png
 
 # The license of this application, in SPDX format
 # NOTE: Currently only supports SPDX 2.1 license expressions, as described in Appendix IV of
 # https://spdx.org/spdx-specification-21-web-version
 # Supported expressions:
 # https://github.com/snapcore/snapd/blob/HEAD/spdx/licenses.go
-#license:
+license: MIT
 
 # Version string just for humans, typically '1.2+git' or '1.3.2'
 # The wrapping single quotes are often required to avoid the version string
@@ -105,46 +99,13 @@ parts:
 
   # Stage snap for fixing the glibc locales(and gnu gettext I18N support)
   # This part is only required for non GUI apps that don't uses the desktop-launch launchers
-  #locales-launch:
-    #plugin: nil
-    #stage-snaps:
-    #- locales-launch
-    #stage-packages:
-    # For localedef(1)
-    #- libc-bin
-
-    # For locale data used by localedef(1)
-    #- locales
-
-    # All pre-generated locale data
-    # DISABLED: Lots of duplicate data will be included in snap when this is staged, unless the target machine has no resource to generate them in runtime otherwise not using it
-    #
-    #   Lack of compiled locales breaks gettext based localisation - snapcraft - snapcraft.io
-    #   https://forum.snapcraft.io/t/lack-of-compiled-locales-breaks-gettext-based-localisation/3758
-    #
-    #- locales-all
-
-  # Remote part for support of various desktop technologies
-  # Refer: https://github.com/ubuntu/snapcraft-desktop-helpers/blob/master/snapcraft.yaml
-  desktop-gnome-platform:
-    source: https://github.com/ubuntu/snapcraft-desktop-helpers.git
-    source-depth: 1
-    source-subdir: gtk
-
-    plugin: make
-    build-packages:
-    - build-essential
-    - libgtk-3-dev
-    override-build: |
-      snapcraftctl build
-      mkdir -pv $SNAPCRAFT_PART_INSTALL/gnome-platform
-
-  # Integrate custom dialogs in your snap - doc - snapcraft.io
-  # https://forum.snapcraft.io/t/integrate-custom-dialogs-in-your-snap/10825
-  zenity-integration:
+  locales-launch:
     plugin: nil
     stage-snaps:
-    - zenity-integration
+    - locales-launch
+    stage-packages:
+    - libc-bin
+    - locales
 
   main:
     after:
@@ -167,7 +128,7 @@ parts:
 
     plugin: dump
     organize:
-      my-awesome-app: bin/
+      waifu2x: bin/
     stage:
     - bin/*
 
@@ -184,23 +145,19 @@ parts:
 # with `_snap_name_` or `snap run _snap_name_` commands, otherwise it can only be run
 # via `_snap_name_._app_name_` or `snap run _snap_name_._app_name_`
 apps:
-  my-awesome-app:
+  waifu2x:
     # The adapter to set up runtime environment at the launch of the snap
     # NOTE: The `command-chain` property is only supported by the `full` adapter
     adapter: full
 
     # An *relative path* to an executable file root from the `prime` directory to be executed, and its command-line arguments
     # NOTE: The right angle bracket at the beginning of the value of the `command` keyword starts a YAML folded style block scalar, refer the following spec document for more info: http://yaml.org/spec/1.2/spec.html#id2796251
-    command: bin/my-awesome-app
+    command: bin/waifu2x
 
     # The commands that are run, in order, before running the one specified by the `command` key
     command-chain:
     - bin/desktop-launch
-    - bin/my-awesome-app-launch
-
-    # If the providing part of the app. has a desktop entry, specify its path relative to the `prime` directory.
-    # If the packaging target doesn't provide a desktop entry, ignore the `desktop` key and implement a desktop entry in `/snap/gui`
-    #desktop: share/applications/my-awesome-app.desktop
+    - bin/waifu2x-launch
 
 # Refer the following documentation for asserting interface plugs and slots in a security confined snap:
 # Interface management - doc - snapcraft.io
@@ -209,46 +166,11 @@ apps:
 # https://docs.snapcraft.io/supported-interfaces/7744
 # Non-A/C: Non-autoconnect interface
 plugs:
-  # Common desktop interfaces
-  # https://forum.snapcraft.io/t/the-desktop-interfaces/2042
-  desktop:
-  desktop-legacy:
-  unity7:
-  wayland:
-
-  # GNOME and Gtk runtime via content sharing
-  # https://forum.snapcraft.io/t/desktop-app-support-gtk/6834
-  gnome-3-28-1804:
-    interface: content
-    target: $SNAP/gnome-platform
-    default-provider: gnome-3-28-1804
-
-  # Gtk Common Themes support
-  # https://forum.snapcraft.io/t/how-to-use-the-system-gtk-theme-via-the-gtk-common-themes-snap/6235
-  gsettings:
-  gtk-3-themes:
-    interface: content
-    target: $SNAP/data-dir/themes
-    default-provider: gtk-common-themes
-  icon-themes:
-    interface: content
-    target: $SNAP/data-dir/icons
-    default-provider: gtk-common-themes
-  sound-themes:
-    interface: content
-    target: $SNAP/data-dir/sounds
-    default-provider: gtk-common-themes
-
   # Regular files access
-  #home:
-  #removable-media: # Non-A/C
+  home:
+  removable-media: # Non-A/C
 
   # Network access
   #network:
 
 #slots:
-
-layout:
-  # Fix resource relocation problem of zenity part
-  /usr/share/zenity:
-    symlink: $SNAP/usr/share/zenity
