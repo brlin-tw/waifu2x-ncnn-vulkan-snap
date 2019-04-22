@@ -54,6 +54,14 @@ license: MIT
 # https://forum.snapcraft.io/t/extracting-information-from-sources-in-snapcraft-parts/4642
 adopt-info: main
 
+# mesa-vulkan-drivers not available in s390x architecture, making it unusable
+# armhf architecture failed to build from source ("error: ‘float32x4_t’ was not declared in this scope")
+architectures:
+- build-on: i386
+- build-on: amd64
+- build-on: arm64
+- build-on: ppc64el
+
 # Base runtime
 # The common runtime for the snap to run on, or `bare` for static linked applications
 base: core18
