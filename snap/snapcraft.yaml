@@ -27,7 +27,7 @@ description: |
 
   This is not an official distribution of waifu2x-ncnn-vulkan, for any problems regarding the use of this snap please refer to the snap issue tracker:
 
-  https://github.com/Lin-Buo-Ren/waifu2x-snap/issues
+  https://github.com/Lin-Buo-Ren/waifu2x-ncnn-vulkan-snap/issues
 
   This snap currently only ships intel / amd vulkan drivers
 
