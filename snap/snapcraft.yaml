@@ -139,7 +139,7 @@ parts:
     #- vulkan-sdk
 
     source: https://github.com/Tencent/ncnn.git
-    source-commit: c180e875026b6f6ffa0f6e3e489a5c1487439b7f
+    #source-commit: c180e875026b6f6ffa0f6e3e489a5c1487439b7f
     #source-depth: 1
     build-packages:
     - g++
