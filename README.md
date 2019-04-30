@@ -64,4 +64,5 @@ You may generate the unique hash by using the following command in terminal:
 ## Contacts
 | Packager | Upstream |
 | :-: | :-: |
-| [![Packager's avatar](http://gravatar.com/avatar/66a5b84972e73e895d5d68d48b1e1e22/?s=128)<br>林博仁<br>Buo-ren, Lin](mailto:Buo.Ren.Lin@gmail.com) | [![Upstream's avatar](GitHub-Mark.png)<br>Upstream's issue tracker](https://github.com/nagadomi/waifu2x/issues) |
+| [![Packager's avatar](http://gravatar.com/avatar/66a5b84972e73e895d5d68d48b1e1e22/?s=128)<br>林博仁<br>Buo-ren, Lin](mailto:Buo.Ren.Lin@gmail.com) | [![Upstream's avatar](GitHub-Mark.png)<br>Upstream's issue tracker](https://github.com/nihui/waifu2x-ncnn-vulkan/issues) |
+
